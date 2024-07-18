@@ -1,0 +1,201 @@
+import streamlit as st
+import vertexai
+from vertexai.preview.generative_models import GenerativeModel, Part
+import vertexai.preview.generative_models as generative_models
+def main():
+    st.set_page_config(page_title="Study Buddy", page_icon=":School:", layout="wide")
+    
+    
+    st.markdown(
+        """
+        <style>
+        body {
+            background-color: white;
+            color: black;
+        }       
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    pages = {
+        "Home": home_page,
+        "Study Buddy": study_buddy_page,
+        "Study Buddy Details": study_buddy_details_page,
+        "How to Use Study Buddy": how_to_use_page,
+        "Upload File": upload_file_page,
+        "What Do You Need Help With?": help_needed_page,
+        "Study Buddy Chat": study_buddy_chat_page,
+        "Join a Study Session": join_session_page,
+        "Answer Questions": answer_questions_page
+    }
+    
+    page = st.sidebar.radio("Navigate", list(pages.keys()))
+    
+    pages[page]()
+
+def home_page():
+    st.title("Home")
+    
+    search_query = st.text_input("Search")
+    search_button = st.button("Search",key="search_button")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.button("Study Buddy",key="study_buddy_button")
+        st.button("Canvas",key="canvas_button")
+        st.button("Zoom",key="zoom_button")
+        st.button("Google Calendar",key="google_calendar_button")
+    with col2:
+        st.button("Gmail",key="gmail_button")
+        st.button("Slack",key="slack_button")
+        st.button("Notion",key="notion_button")
+        st.button("Spotify",key="spotify_button")
+    with col3:
+        st.button("Netflix",key="netflix_button")
+        st.button("TikTok",key="tiktok_button")
+        st.button("Instagram",key="instagram_button")
+        st.button("Facebook",key="facebook_button")
+
+def study_buddy_page():
+    st.title("Study Buddy")
+    
+    if st.button("Back",key="back_button"):
+        home_page()
+    
+    #st.image("/home/chinonso_egeolu/sampleStreamlit//home/chinonso_egeolu/sampleStreamlit/normal.png", caption="Study Buddy")
+
+    
+    st.write("Study smarter, not harder. We're a community of college students who want to help each other succeed in school. Our app is designed to make it easy for you to find study partners and form study groups.")
+    st.write("How it works ")
+    
+    if st.button("Get Started", key="get_started_button"):
+        study_buddy_details_page()
+
+def study_buddy_details_page():
+    st.title("Study Buddy")
+    
+    if st.button("Back",key="back1_button"):
+        study_buddy_page()
+    
+    st.header("Upcoming Deadlines")
+    st.write("- History Midterm")
+    st.write("- Chemistry Lab Report")
+    st.write("- Final Exam")
+    
+    if st.button("Add a Deadline",key="add_deadline_button"):
+        how_to_use_page()
+
+def how_to_use_page():
+    st.title("How to Use Study Buddy")
+    
+    st.subheader("Step 1")
+    if st.button("Join Session", key="join_session_button"):
+        join_session_page()
+    
+    st.subheader("Step 2")
+    if st.button("Ask Question",key="ask_question1_button"):
+        study_buddy_chat_page()
+    
+    st.subheader("Step 3")
+    if st.button("Answer Questions",key="ask_question_button"):
+        answer_questions_page()
+    
+    if st.button("Get Started", key="get_started_button"):
+        upload_file_page()
+
+def upload_file_page():
+    st.title("Upload a File")
+    
+    if st.button("Cancel",key="cancel_button"):
+        main()
+    
+    file = st.file_uploader("Select a file")
+    
+    file_name = st.text_input("Name your file")
+    
+    if st.button("Upload",key="upload_button"):
+        help_needed_page()
+
+def help_needed_page():
+    st.title("What do you need help with?")
+    st.write("We'll use this to recommend the best study buddy for you.")
+    
+    if st.button("Problem Set",key="problem_set_button"):
+        study_buddy_chat_page()
+    if st.button("Project",key="project_button"):
+        study_buddy_chat_page()
+    if st.button("Midterm",key="midterm_button"):
+        study_buddy_chat_page()
+    if st.button("Final Exam",key="final_exam_button"):
+        study_buddy_chat_page()
+
+def study_buddy_chat_page():
+    st.title("Study Buddy")
+    st.write("Hey there, what can I help you with?")
+    
+    user_input = st.text_input("Try 'I need help with math'",key="user1_input")
+
+    
+    if st.button("Send", key="send_button"):
+        vertexai.init(project="quantum-petal-414420", location="us-central1")
+        
+        
+        model = GenerativeModel("gemini-1.0-pro-vision-001")
+        
+        
+        responses = model.generate_content(
+            [Part.from_text(user_input)],
+            generation_config={
+                "max_output_tokens": 2048,
+                "temperature": 0.4,
+                "top_p": 1,
+                "top_k": 32
+            },
+            safety_settings={
+                generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            },
+            stream=True,
+        )
+        
+        
+        generated_response = ""
+        for response in responses:
+            generated_response += response.text
+        
+        st.write("Study Buddy:", generated_response)
+
+       
+        pass
+
+def join_session_page():
+    st.title("Join a Study Session")
+    
+    session_code = st.text_input("Enter Code",key="session_code")
+    
+    if st.button("Join", key="join_button"):
+        
+        pass
+    
+    if st.button("Create",key="create_button"):
+       
+        pass
+
+def answer_questions_page():
+    st.title("Answer Questions")
+    
+    
+    random_question = "What is the capital of France?"
+    st.write(random_question)
+    
+    user_answer = st.text_input("Enter your answer", key="user_answer")
+    
+    if st.button("Submit", key="submit_button"):
+        
+        pass
+
+if __name__ == "__main__":
+    main()
